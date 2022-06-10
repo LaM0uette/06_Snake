@@ -7,20 +7,23 @@ import json
 
 letter_player = "#"
 letter_food = "O"
+window_border = "'|', '|', '-', '-', '+', '+', '+', '+'"
 
 with open(r"T:\- 4 Suivi Appuis\18-Partage\de VILLELE DORIAN\00_MINI_JEUX\SnaKe\users.json") as f:
     data = json.load(f)
     user = data.get(str(os.getenv("USERNAME")))
 
-def initGame():
+def init_game():
     curses.initscr()
     curses.noecho()
     curses.curs_set(0)
-
     return curses
 
+def display_food(window, *args):
+    window.addch(args[0], args[1], args[2])
+
 def NewGame(h, w):
-    curses = initGame()
+    curses = init_game()
 
     curses.resize_term(h, w)
     window = curses.newwin(h, w, 0, 0)
@@ -36,10 +39,10 @@ def NewGame(h, w):
     food = [round(h/2), round(w/2)]
 
     # Display the first food
-    window.addch(food[0], food[1], letter_food)
+    display_food(window, food[0], food[1], letter_food)
 
     while key != 27:  # While they Esc key is not pressed
-        window.border('|', '|', '-', '-', '+', '+', '+', '+')
+        window.border(window_border)
 
         # Display the score and title
         window.addstr(0, 2, f'Score: {str(score)} ')
@@ -71,11 +74,11 @@ def NewGame(h, w):
 
                 if food in snake: food = []
 
-            window.addch(food[0], food[1], letter_food)  #display the food
+            display_food(window, food[0], food[1], letter_food)
         else:
             last = snake.pop()
-            window.addch(last[0], last[1], ' ')
-        window.addch(snake[0][0], snake[0][1], letter_player)
+            display_food(window, last[0], last[1], ' ')
+        display_food(window, snake[0][0], snake[0][1], letter_player)
 
     curses.endwin()
     print("\nScore: " + str(score))
