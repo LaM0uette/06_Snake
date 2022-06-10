@@ -7,25 +7,45 @@ import json
 
 letter_player = "#"
 letter_food = "O"
-window_border = "'|', '|', '-', '-', '+', '+', '+', '+'"
 
-with open(r"T:\- 4 Suivi Appuis\18-Partage\de VILLELE DORIAN\00_MINI_JEUX\SnaKe\users.json") as f:
-    data = json.load(f)
+with open(r"T:\- 4 Suivi Appuis\18-Partage\de VILLELE DORIAN\00_MINI_JEUX\SnaKe\users.json") as file:
+    data = json.load(file)
     user = data.get(str(os.getenv("USERNAME")))
-
-def init_game():
-    curses.initscr()
-    curses.noecho()
-    curses.curs_set(0)
-    return curses
 
 def display_food(window, *args):
     window.addch(args[0], args[1], args[2])
 
-def NewGame(h, w):
-    curses = init_game()
+def update_leaderboard(score):
+    leaderboard_file = r"T:\- 4 Suivi Appuis\18-Partage\de VILLELE DORIAN\00_MINI_JEUX\SnaKe\leaderboard\leaderboard.json"
 
+    with open(leaderboard_file) as file:
+        data = json.load(file)
+        best_score = data.get(user)
+
+    if score <= best_score: return
+
+    with open(leaderboard_file, "r+", encoding="utf-8") as fichier:
+        data = json.load(fichier)
+        data.update({user: score})
+        fichier.seek(0)
+        json.dump(data, fichier, indent=4, ensure_ascii=False)
+        fichier.truncate()
+
+def end_game(score):
+    score_fin = "\nScore: " + str(score)
+    print(score_fin)
+
+    with open(fr"T:\- 4 Suivi Appuis\18-Partage\de VILLELE DORIAN\00_MINI_JEUX\SnaKe\logs\Logs_{user}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.log", "w") as f:
+        f.write(f"{user}\n{score_fin}")
+
+    update_leaderboard(score)
+
+def NewGame(h, w):
+    curses.initscr()
+    curses.noecho()
+    curses.curs_set(0)
     curses.resize_term(h, w)
+
     window = curses.newwin(h, w, 0, 0)
     window.keypad(True)  # Enable keypad
     window.nodelay(True)  # Makes it possible to not wait for the user input
@@ -42,7 +62,7 @@ def NewGame(h, w):
     display_food(window, food[0], food[1], letter_food)
 
     while key != 27:  # While they Esc key is not pressed
-        window.border(window_border)
+        window.border('|', '|', '-', '-', '+', '+', '+', '+')
 
         # Display the score and title
         window.addstr(0, 2, f'Score: {str(score)} ')
@@ -81,10 +101,7 @@ def NewGame(h, w):
         display_food(window, snake[0][0], snake[0][1], letter_player)
 
     curses.endwin()
-    print("\nScore: " + str(score))
-
-    with open(fr"T:\- 4 Suivi Appuis\18-Partage\de VILLELE DORIAN\00_MINI_JEUX\SnaKe\logs\Logs_{user}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.log", "w") as f:
-        f.write("\nScore: " + str(score))
+    end_game(score)
 
 
 run = True
