@@ -1,15 +1,14 @@
 import curses
-import os
 from random import randint
 
 
-curses.initscr()
-curses.noecho()
-curses.curs_set(0)
-letter_player = "#"
-letter_food = "O"
-
 def NewGame(h, w):
+    curses.initscr()
+    curses.noecho()
+    curses.curs_set(0)
+    letter_player = "#"
+    letter_food = "O"
+
     curses.resize_term(h, w)
     window = curses.newwin(h, w, 0, 0)
     window.keypad(True)  # Enable keypad
@@ -69,6 +68,18 @@ def NewGame(h, w):
     print("\nScore: " + str(score))
 
 
-NewGame(h=30, w=60)
+run = True
+while run:
+    txt = input("Une partie ? (o|n) (c pour custom) : ")
 
-os.system("pause > nul")
+    if txt.lower() == "o":
+        NewGame(h=20, w=50)
+    elif txt.lower() == "n":
+        run = False
+    elif txt.lower() == "c":
+        h = input("Hauteur du terrain : ")
+        l = input("Largeur du terrain : ")
+
+        NewGame(h=int(h), w=int(l))
+    else:
+        print("Saisie incorect !")
