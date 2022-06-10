@@ -19,8 +19,8 @@ def NewGame(h, w):
     score = 0
 
     # Initialize first food and snake coordinates
-    snake = [[5, 8], [5, 7], [5, 6]]
-    food = [10, 25]
+    snake = [[1, 3], [1, 2], [1, 1]]
+    food = [round(h/2), round(w/2)]
 
     # Display the first food
     window.addch(food[0], food[1], letter_food)
@@ -30,7 +30,7 @@ def NewGame(h, w):
 
         # Display the score and title
         window.addstr(0, 2, f'Score: {str(score)} ')
-        window.addstr(0, 27, ' SNAKE! ')
+        window.addstr(0, round(w/2), ' SNAKE! ')
 
         # Make the snake faster as it eats more
         window.timeout(round(140 - (len(snake) / 5 + len(snake) / 10) % 120))
@@ -73,13 +73,11 @@ while run:
     txt = input("Une partie ? (o|n) (c pour custom) : ")
 
     if txt.lower() == "o":
-        NewGame(h=20, w=50)
+        NewGame(h=30, w=60)
     elif txt.lower() == "n":
         run = False
     elif txt.lower() == "c":
-        h = input("Hauteur du terrain : ")
-        l = input("Largeur du terrain : ")
-
-        NewGame(h=int(h), w=int(l))
+        size = int(input("Taille du terrain (10 Minimum) : "))
+        NewGame(h=size, w=size*2)
     else:
         print("Saisie incorect !")
