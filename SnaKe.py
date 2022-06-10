@@ -1,23 +1,30 @@
 import curses
 import datetime
 import os
+import shutil
 from random import randint
 import json
 
 GUID = str(os.getenv("USERNAME"))
-JSON_USERS = r"T:\- 4 Suivi Appuis\18-Partage\de VILLELE DORIAN\00_MINI_JEUX\SnaKe\users.json"
-LEADERBOARD = r"T:\- 4 Suivi Appuis\18-Partage\de VILLELE DORIAN\00_MINI_JEUX\SnaKe\leaderboard"
+JSON_USERS = "T:\\- 4 Suivi Appuis\\18-Partage\\de VILLELE DORIAN\\00_MINI_JEUX\\SnaKe\\users.json"
+LEADERBOARD_TEMP = "T:\\- 4 Suivi Appuis\\18-Partage\\de VILLELE DORIAN\\00_MINI_JEUX\\SnaKe\\leaderboard\\__TEMP__.json"
+LEADERBOARD = "T:\\- 4 Suivi Appuis\\18-Partage\\de VILLELE DORIAN\\00_MINI_JEUX\\SnaKe\\leaderboard\\"
 
 class SnaKe:
     def __init__(self, h, w):
         self.letter_player = "#"
         self.letter_food = "O"
+        self.wall = "#"
+        self.corner = "@"
         self.height = h
         self.width = w
-        self.user = None
+        self.user = ""
         self.score = 0
 
+        self.leaderboard_file = f"{LEADERBOARD}leaderboard_{self.height}_{self.width}.json"
+
         self.init_player()
+        self.init_leaderboard()
 
     def open_json(self, file):
         with open(file) as js:
@@ -35,22 +42,27 @@ class SnaKe:
         data = self.open_json(JSON_USERS)
         self.user = data.get(GUID)
 
-        if self.user:
-            self.update_json(JSON_USERS, {GUID: "Inconnu"})
+        if self.user is None:
+            self.update_json(JSON_USERS, {GUID: GUID})
+            self.user = GUID
+
+    def init_leaderboard(self):
+        False if os.path.exists(self.leaderboard_file) else shutil.copyfile(LEADERBOARD_TEMP, self.leaderboard_file)
 
     def write_log(self, file, score_fin):
         with open(file, "w") as js:
             js.write(f"{self.user}\n{score_fin}")
 
     def update_leaderboard(self):
-        ldb = f"{LEADERBOARD}\leaderboard_{self.height}_{self.width}.json"
+        data = self.open_json(self.leaderboard_file)
 
-        data = self.open_json(ldb)
-        best_score = data.get(self.user)
+        try:
+            best_score = data.get(self.user)
+            if self.score <= best_score: return
+        except:
+            pass
 
-        if self.score <= best_score: return
-
-        self.update_json(ldb, {self.user: self.score})
+        self.update_json(self.leaderboard_file, {self.user: self.score})
 
     def end_game(self):
         score_fin = "\nScore: " + str(self.score)
@@ -71,6 +83,7 @@ class SnaKe:
         curses.resize_term(self.height, self.width)
 
         window = curses.newwin(self.height, self.width, 0, 0)
+        window.border(self.wall, self.wall, self.wall, self.wall, self.corner, self.corner, self.corner, self.corner)
         window.keypad(True)  # Enable keypad
         window.nodelay(True)  # Makes it possible to not wait for the user input
 
@@ -85,8 +98,6 @@ class SnaKe:
         self.display_food(window, food[0], food[1], self.letter_food)
 
         while key != 27:  # While they Esc key is not pressed
-            window.border('|', '|', '-', '-', '+', '+', '+', '+')
-
             # Display the score and title
             window.addstr(0, 2, f'Score: {str(self.score)} ')
             window.addstr(0, round(self.width / 2), ' SNAKE! ')
