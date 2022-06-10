@@ -1,13 +1,26 @@
 import curses
+import datetime
+import os
 from random import randint
+import json
 
 
-def NewGame(h, w):
+letter_player = "#"
+letter_food = "O"
+
+with open(r"T:\- 4 Suivi Appuis\18-Partage\de VILLELE DORIAN\00_MINI_JEUX\SnaKe\users.json") as f:
+    data = json.load(f)
+    user = data.get(str(os.getenv("USERNAME")))
+
+def initGame():
     curses.initscr()
     curses.noecho()
     curses.curs_set(0)
-    letter_player = "#"
-    letter_food = "O"
+
+    return curses
+
+def NewGame(h, w):
+    curses = initGame()
 
     curses.resize_term(h, w)
     window = curses.newwin(h, w, 0, 0)
@@ -66,6 +79,9 @@ def NewGame(h, w):
 
     curses.endwin()
     print("\nScore: " + str(score))
+
+    with open(fr"T:\- 4 Suivi Appuis\18-Partage\de VILLELE DORIAN\00_MINI_JEUX\SnaKe\logs\Logs_{user}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.log", "w") as f:
+        f.write("\nScore: " + str(score))
 
 
 run = True
