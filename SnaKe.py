@@ -51,7 +51,9 @@ class SnaKe:
 
     def write_log(self, file, score_fin):
         with open(file, "w") as js:
-            js.write(f"{self.user}\n{score_fin}")
+            js.write(f"""Terrain: {self.height}_{self.width}
+            User: {self.user}
+            Score: {score_fin}""")
 
     def update_leaderboard(self):
         data = self.open_json(self.leaderboard_file)
