@@ -3,12 +3,13 @@ import datetime
 import os
 import shutil
 from random import randint
-import json
+import utils
 
 GUID = str(os.getenv("USERNAME"))
-JSON_USERS = "T:\\- 4 Suivi Appuis\\18-Partage\\de VILLELE DORIAN\\00_MINI_JEUX\\SnaKe\\users.json"
-LEADERBOARD_TEMP = "T:\\- 4 Suivi Appuis\\18-Partage\\de VILLELE DORIAN\\00_MINI_JEUX\\SnaKe\\leaderboard\\__TEMP__.json"
-LEADERBOARD = "T:\\- 4 Suivi Appuis\\18-Partage\\de VILLELE DORIAN\\00_MINI_JEUX\\SnaKe\\leaderboard\\"
+JSON_USERS = "F:\\ADOBE\\Creative Cloud Files\\01_PROJETS\\01_PROG\\01_PYTHON\\Formation\\01_Python\\TP\\06_Snake\\users.json"
+LEADERBOARD_TEMP = "F:\\ADOBE\\Creative Cloud Files\\01_PROJETS\\01_PROG\\01_PYTHON\\Formation\\01_Python\\TP\\06_Snake\\leaderboard\\__TEMP__.json"
+LEADERBOARD = "F:\\ADOBE\\Creative Cloud Files\\01_PROJETS\\01_PROG\\01_PYTHON\\Formation\\01_Python\\TP\\06_Snake\\leaderboard\\"
+
 
 class SnaKe:
     def __init__(self, h, w):
@@ -26,24 +27,12 @@ class SnaKe:
         self.init_player()
         self.init_leaderboard()
 
-    def open_json(self, file):
-        with open(file) as js:
-            return json.load(js)
-
-    def update_json(self, file, dct):
-        with open(file, "r+", encoding="utf-8") as fichier:
-            data = json.load(fichier)
-            data.update(dct)
-            fichier.seek(0)
-            json.dump(data, fichier, indent=4, ensure_ascii=False)
-            fichier.truncate()
-
     def init_player(self):
-        data = self.open_json(JSON_USERS)
+        data = utils.open_json(JSON_USERS)
         self.user = data.get(GUID)
 
         if self.user is None:
-            self.update_json(JSON_USERS, {GUID: GUID})
+            utils.update_json(JSON_USERS, {GUID: GUID})
             self.user = GUID
 
     def init_leaderboard(self):
@@ -56,7 +45,7 @@ User: {self.user}
 Score: {self.score}""")
 
     def update_leaderboard(self):
-        data = self.open_json(self.leaderboard_file)
+        data = utils.open_json(self.leaderboard_file)
 
         try:
             best_score = data.get(self.user)
@@ -64,12 +53,14 @@ Score: {self.score}""")
         except:
             pass
 
-        self.update_json(self.leaderboard_file, {self.user: self.score})
+        utils.update_json(self.leaderboard_file, {self.user: self.score})
 
     def end_game(self):
         score_fin = "\nScore: " + str(self.score)
 
-        self.write_log(fr"T:\- 4 Suivi Appuis\18-Partage\de VILLELE DORIAN\00_MINI_JEUX\SnaKe\logs\Logs_{self.user}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.log", score_fin)
+        self.write_log(
+            fr"F:\ADOBE\Creative Cloud Files\01_PROJETS\01_PROG\01_PYTHON\Formation\01_Python\TP\06_Snake\logs\Logs_{self.user}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.log",
+            score_fin)
 
         print(score_fin)
 
@@ -111,12 +102,14 @@ Score: {self.score}""")
             key = key if event == -1 else event
 
             # Calculates the new coordinates of the head of the snake.
-            snake.insert(0, [snake[0][0] + (key == curses.KEY_DOWN and 1) + (key == curses.KEY_UP and -1), snake[0][1] + (key == curses.KEY_LEFT and -1) + (key == curses.KEY_RIGHT and 1)])
+            snake.insert(0, [snake[0][0] + (key == curses.KEY_DOWN and 1) + (key == curses.KEY_UP and -1),
+                             snake[0][1] + (key == curses.KEY_LEFT and -1) + (key == curses.KEY_RIGHT and 1)])
 
             # Exit if snake crosses the boundaries
-            if snake[0][0] == 0 or snake[0][0] == self.height - 1 or snake[0][1] == 0 or snake[0][1] == self.width - 1: break
+            if snake[0][0] == 0 or snake[0][0] == self.height - 1 or snake[0][1] == 0 or snake[0][
+                1] == self.width - 1: break
 
-            #Exit if snake runs over itself
+            # Exit if snake runs over itself
             if snake[0] in snake[1:]: break
 
             # When snake eats the food
@@ -149,6 +142,6 @@ while run:
         run = False
     elif txt.lower() == "c":
         size = int(input("Taille du terrain (10 Minimum) : "))
-        SnaKe(h=size, w=size*2).NewGame()
+        SnaKe(h=size, w=size * 2).NewGame()
     else:
-        print("Saisie incorect !")
+        print("Saisie incorrect !")
